@@ -8,7 +8,6 @@ import { toast } from "react-toastify";
 export default function ItemPage() {
   const { id } = useParams();
   const [items, setItems] = useAtom(itemsAtom);
-  // Retrieve the item if ID exists
   const selectedItem = id ? items[id] : undefined;
 
   const [itemCount, setItemCount] = useState(
@@ -25,6 +24,10 @@ export default function ItemPage() {
     }
   };
 
+  /**
+   * Updated the number of items for this item to reflect
+   * the number of items the users selected
+   */
   const addToCart = () => {
     if (selectedItem && selectedItem.id) {
       const updatedItems = { ...items };
@@ -33,7 +36,6 @@ export default function ItemPage() {
         numItem: itemCount,
       };
       setItems(updatedItems);
-      console.log(selectedItem);
       toast.success("Item has been added to cart");
     } else {
       toast.error("Error adding item to cart");
@@ -77,7 +79,6 @@ export default function ItemPage() {
         </div>
         <div className="pt-8">
           {" "}
-          {/* Add margin-top to move the button down */}
           <button
             onClick={addToCart}
             className=" bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-4 rounded transition duration-200 ease-in-out"

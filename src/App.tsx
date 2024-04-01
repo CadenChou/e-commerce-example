@@ -1,14 +1,9 @@
-import React, { useEffect } from "react";
-import logo from "./logo.svg";
-import SweaterPic from "./assets/sweater.jpg";
-import ShirtPic from "./assets/shirt.jpg";
-import PantsPic from "./assets/pants.jpg";
-import SuitPic from "./assets/suit.jpg";
+import React, { useEffect, useState } from "react";
+
 import "./App.css";
 import Navbar from "./components/Navbar";
-import SwiperBanner from "./components/SwiperBanner";
-import { Item, ItemDict, categories } from "./utils/types";
-import { itemsAtom, categoryAtom } from "./utils/atoms";
+import { Item, ItemDict } from "./utils/types";
+import { itemsAtom, categoriesAtom, isLoadingAtom } from "./utils/atoms";
 import { useAtom } from "jotai";
 import HomeScreen from "./components/HomeScreen";
 import { Routes, Route } from "react-router-dom";
@@ -19,40 +14,67 @@ import Cart from "./components/Cart";
 
 function App() {
   const [items, setItems] = useAtom(itemsAtom);
-  const [category, setCategory] = useAtom(categoryAtom);
-
-  const categoryImageMapping: Record<string, string> = {
-    Suits: SuitPic,
-    "Dress Shirts": ShirtPic,
-    "Chinos & Casual Pants": PantsPic,
-    Sweaters: SweaterPic,
-  };
+  const [categories, setCategories] = useAtom(categoriesAtom);
+  const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
 
   useEffect(() => {
-    const initializeItems = () => {
-      const initializedItems: ItemDict = {};
-      categories.forEach((category) => {
-        // Example: Generate some dummy items for each category
-        const numItemsToCreate = Math.floor(Math.random() * 5 + 5);
-        const categoryImage = categoryImageMapping[category];
-        for (let i = 0; i < numItemsToCreate; i++) {
-          const itemId = `${category}-${i}`;
-          initializedItems[itemId] = {
-            id: itemId,
-            photo_refs: [categoryImage],
-            name: `${category} ${i}`,
-            description: `Description for ${category} ${i}. Hand-crafted in Italy`,
-            category: category,
-            price: Math.trunc(Math.random() * 100 + 50),
+    /**
+     * Fetch data from API endpoint and store in atom state
+     */
+    const fetchData = async () => {
+      try {
+        const res = await fetch("https://dummyjson.com/products");
+        const data = await res.json();
+
+        // Store items in a mapping from id to Item for easier access
+        const transformedItems: ItemDict = {};
+
+        data.products.forEach((itemData: any) => {
+          const itemId: number = itemData.id;
+          const itemIdStr: string = itemId.toString();
+          const transformedItem: Item = {
+            id: itemIdStr,
+            name: itemData.title,
+            description: itemData.description,
+            price: itemData.price,
+            category: itemData.category,
+            photo_refs: itemData.images,
             numItem: 0,
           };
-        }
-      });
-      setItems(initializedItems);
+
+          transformedItems[itemData.id] = transformedItem;
+        });
+
+        // Update the itemsAtom state with the transformed items
+        setItems(transformedItems);
+      } catch (e) {
+        console.log("error fetching data, ", e);
+      } finally {
+        setIsLoading(false);
+      }
     };
-    initializeItems();
-    console.log(items);
+
+    /**
+     * Fetch the categories of the products form API endpoint
+     */
+    const fetchCategories = async () => {
+      const res = await fetch("https://dummyjson.com/products/categories");
+      const data = await res.json();
+      // Slice (0,4) to get 4 categories (just to simplify the website)
+      const truncatedCategories = data.slice(0, 4);
+      setCategories(truncatedCategories);
+    };
+    fetchData();
+    fetchCategories();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center">
+        <div>loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-white flex flex-col items-center">

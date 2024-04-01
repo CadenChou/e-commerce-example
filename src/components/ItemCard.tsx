@@ -1,16 +1,11 @@
 import { Item } from "../utils/types";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
 
 export default function ItemCard({ item }: { item: Item }) {
   const [imageLoaded, setImageLoaded] = useState<boolean>(false);
-
-  async function setCart() {
-    if (!item.id) return;
-  }
 
   return (
     <div className="group relative h-64 w-52 border-[1.5px] border-[#EBEBEB] hover:border-design-gray-300 flex flex-col rounded-md overflow-hidden bg-white duration-300">
@@ -33,9 +28,8 @@ export default function ItemCard({ item }: { item: Item }) {
           <p className="w-1/4 flex flex-row justify-end">${item.price}</p>
         </div>
       </Link>
-      <button
-        type="button"
-        onClick={setCart}
+      <Link
+        to={`/item-page/${item.id}`}
         className="absolute group-hover:opacity-100 opacity-0 duration-300 group-hover:pointer-events-auto pointer-events-none top-1 right-1 w-fit h-fit"
       >
         {item.numItem && item.numItem > 0 ? (
@@ -43,7 +37,7 @@ export default function ItemCard({ item }: { item: Item }) {
         ) : (
           <FavoriteBorderIcon fontSize="medium" className="text-white" />
         )}
-      </button>
+      </Link>
     </div>
   );
 }
