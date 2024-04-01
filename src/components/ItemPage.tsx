@@ -50,7 +50,7 @@ export default function ItemPage() {
     );
   }
   return (
-    <div className="w-full h-[80vh] flex flex-row items-center justify-center border">
+    <div className="w-full h-[80vh] flex flex-row items-center justify-center">
       <div className="w-[50%] flex justify-center">
         {selectedItem.photo_refs && (
           <img className=" h-96" src={selectedItem.photo_refs[0]} />
